@@ -49,6 +49,9 @@ Lighting System: Walk through the detection area to ensure lights turn on automa
 Mobile Integration: Test the mobile application to ensure it accurately reflects the system's status and allows for control.
 Model House
 The model house will showcase the integration and functionality of the home automation system in a controlled environment.
+
+_Please download the mp4 file (view raw) to view the final output of the project_
+
 Contributing
 
 Please read CONTRIBUTING.md for details on our code of conduct and the process for submitting pull requests.
