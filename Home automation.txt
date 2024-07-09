@@ -1,0 +1,80 @@
+
+#include <BlynkSimpleEsp8266.h>  // IncludeS Blynk library for ESP8266 (assuming you're using WiFi)
+#include <ESP8266WiFi.h>        // IncludeS WiFi library for ESP8266
+
+// WiFi credentials
+char auth[] = "88MqGhjr3gOi-DrVCSaLqEFyRrcWwohA";
+char ssid[] = "Finna";
+char pass[] = "adriano42";
+
+// Pin definitions
+#define PIR_PIN 2       // PIR sensor input pin
+#define RELAY_PIN 3     // Relay control pin
+#define BUZZER_PIN 4    // Buzzer control pin
+
+// Variables
+int pirState = LOW;     // Variable to store PIR sensor state
+bool alarmEnabled = true;  // Flag to enable/disable alarm
+
+void setup() {
+  Serial.begin(9600);
+  Blynk.begin(auth, ssid, pass);  // Initialize Blynk
+
+  pinMode(PIR_PIN, INPUT);
+  pinMode(RELAY_PIN, OUTPUT);
+  pinMode(BUZZER_PIN, OUTPUT);
+
+  digitalWrite(RELAY_PIN, LOW);  // Ensure relay is initially off
+  digitalWrite(BUZZER_PIN, LOW); // Ensure buzzer is initially off
+}
+
+void loop() {
+  if (alarmEnabled) {
+    checkPIR();  // Check PIR sensor for motion
+  }
+  Blynk.run();  // Run Blynk background tasks
+}
+
+void checkPIR() {
+  int sensorValue = digitalRead(PIR_PIN);
+  if (sensorValue == HIGH) {
+    if (pirState == LOW) {
+      // Motion detected
+      pirState = HIGH;
+      activateAlarm();
+      sendAlert();
+    }
+  } else {
+    if (pirState == HIGH) {
+      // No motion
+      pirState = LOW;
+      deactivateAlarm();
+    }
+  }
+}
+
+void activateAlarm() {
+  digitalWrite(RELAY_PIN, HIGH);  // Turn on relay (door light)
+  digitalWrite(BUZZER_PIN, HIGH); // Activate buzzer
+}
+
+void deactivateAlarm() {
+  digitalWrite(RELAY_PIN, LOW);   // Turn off relay (door light)
+  digitalWrite(BUZZER_PIN, LOW);  // Deactivate buzzer
+}
+
+void sendAlert() {
+  Blynk.notify("Motion detected at your door!");  // Send notification to Blynk app
+}
+
+// Blynk app control function
+BLYNK_WRITE(V1) {
+  int switchState = param.asInt();
+  if (switchState == 0) {
+    alarmEnabled = false;   // Disable alarm
+    deactivateAlarm();      // Turn off alarm components
+  } else {
+    alarmEnabled = true;    // Enable alarm
+  }
+}
+
